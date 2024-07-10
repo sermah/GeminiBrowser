@@ -6,7 +6,7 @@ import dev.sermah.geminibrowser.model.GemHypertextImpl
 import dev.sermah.geminibrowser.model.GemtextParserImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class BrowserViewModel: ViewModel() {
+class BrowserViewModel : ViewModel() {
     private val _htmlFlow = MutableStateFlow(TEST_GEM_PARSED)
     val htmlFlow get() = _htmlFlow
 

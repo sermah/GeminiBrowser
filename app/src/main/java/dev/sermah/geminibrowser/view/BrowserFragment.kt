@@ -14,8 +14,7 @@ import dev.sermah.geminibrowser.viewmodel.BrowserViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-
-class BrowserFragment: Fragment() {
+class BrowserFragment : Fragment() {
 
     private var _binding: FragmentBrowserBinding? = null
     private val binding: FragmentBrowserBinding

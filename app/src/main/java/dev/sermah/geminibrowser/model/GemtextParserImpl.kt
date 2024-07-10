@@ -1,6 +1,6 @@
 package dev.sermah.geminibrowser.model
 
-class GemtextParserImpl: GemtextParser {
+class GemtextParserImpl : GemtextParser {
     override fun parse(gemtext: String): GemtextParser.ParseResult {
         var state = ParsingState.NORMAL
 
@@ -67,6 +67,7 @@ class GemtextParserImpl: GemtextParser {
                         )
                     }
                 }
+
                 ParsingState.PREFORMATTED -> {
                     if (line.startsWith("```")) {
                         state = ParsingState.NORMAL
