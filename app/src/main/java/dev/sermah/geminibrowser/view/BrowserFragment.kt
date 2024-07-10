@@ -5,55 +5,52 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import dev.sermah.geminibrowser.databinding.FragmentBrowserBinding
-import dev.sermah.geminibrowser.model.GemHypertextImpl
-import dev.sermah.geminibrowser.model.GemtextParserImpl
+import dev.sermah.geminibrowser.viewmodel.BrowserViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 
 class BrowserFragment: Fragment() {
 
-    private lateinit var binding: FragmentBrowserBinding
+    private var _binding: FragmentBrowserBinding? = null
+    private val binding: FragmentBrowserBinding
+        get() = checkNotNull(_binding)
+
+    private val viewModel: BrowserViewModel by lazy {
+        ViewModelProvider(requireActivity())[BrowserViewModel::class.java]
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = FragmentBrowserBinding.inflate(inflater)
+        _binding = FragmentBrowserBinding.inflate(inflater)
         return binding.root
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val data = GemHypertextImpl(GemtextParserImpl()).convertToHypertext(
-            """
-                    ## This is a Gemtext Document
-
-                    * This is a simple bullet point list.
-                    * Nested bullet points are indented with a space.
-                    
-                    > They can be nested multiple levels.
-                    > This is a numbered list.
-                    
-                    # This is a heading.
-                    ## This is a subheading.
-                    ### This is a subsubheading.
-                    
-                    ```
-                    This is some code.
-                    It can be multiple lines long.
-                    ```
-                    
-                    => hrrps://utl.s.a
-                    => https://ln.kii Link button
-                    
-                    <b> html tags </b>
-                """.trimIndent()
-        )
         binding.webView.apply {
             settings.javaScriptEnabled = true
-            loadData(data, "text/html; charset=utf-8", "UTF-8")
+            addJavascriptInterface(this@BrowserFragment, "appInterface")
         }
+
+        viewModel.htmlFlow.onEach { html ->
+            binding.webView.loadData(html, "text/html; charset=utf-8", "UTF-8")
+        }.launchIn(viewModel.viewModelScope)
     }
 
     override fun onDestroyView() {
+        binding.webView.destroy()
+        _binding = null
+
         super.onDestroyView()
+    }
+
+    @JavascriptInterface
+    fun onClickLink(link: String?) {
+        link?.let { viewModel.openUrl(it) }
     }
 }

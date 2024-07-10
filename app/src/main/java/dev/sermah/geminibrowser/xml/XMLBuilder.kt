@@ -39,6 +39,10 @@ class XMLBuilder(
         _children.removeAt(idx)
     }
 
+    fun last(): Any? {
+        return _children.lastOrNull()
+    }
+
     fun build() = XMLElement(
         tag = tag,
         klass = _class,
@@ -48,10 +52,10 @@ class XMLBuilder(
 }
 
 class XMLElement(
-    val tag: String,
-    val klass: Set<String> = setOf(),
-    val attributes: Map<String, String> = mapOf(),
-    val children: List<Any> = listOf(),
+    var tag: String,
+    val klass: MutableSet<String> = mutableSetOf(),
+    val attributes: MutableMap<String, String> = mutableMapOf(),
+    val children: MutableList<Any> = mutableListOf(),
 ) {
     override fun toString(): String = buildString {
         asStringInternal(this)
@@ -78,10 +82,11 @@ class XMLElement(
             }
             append(">")
             children.forEach {
-                if (it is XMLElement)
+                if (it is XMLElement) {
                     it.asStringInternal(this)
-                else
+                } else {
                     append(it.toString())
+                }
             }
             append("</")
             append(tag)
