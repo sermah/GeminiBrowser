@@ -1,5 +1,6 @@
 package dev.sermah.geminibrowser.model
 
+import androidx.core.text.htmlEncode
 import dev.sermah.geminibrowser.model.GemtextParser.GemtextItem
 import dev.sermah.geminibrowser.xml.buildXml
 import dev.sermah.geminibrowser.xml.classes
@@ -16,19 +17,19 @@ class GemHypertextImpl(
             parseResult.forEach { item ->
                 when (item) {
                     is GemtextItem.Text -> tag("p") {
-                        text { item.text }
+                        text { item.text.htmlEncode() }
                     }
 
                     is GemtextItem.Link -> tag("button") {
-                        text { item.text }
+                        text { item.text.htmlEncode() }
                     }
 
-                    is GemtextItem.List -> tag("ul") {
-                        text { item.text }
+                    is GemtextItem.List -> tag("li") {
+                        text { item.text.htmlEncode() }
                     }
 
                     is GemtextItem.Preformat -> tag("pre") {
-                        text { item.text }
+                        text { item.text.htmlEncode() }
                     }
 
                     is GemtextItem.Heading -> tag(
@@ -38,11 +39,11 @@ class GemHypertextImpl(
                             GemtextItem.Heading.Level.H3 -> "h3"
                         }
                     ) {
-                        text { item.text }
+                        text { item.text.htmlEncode() }
                     }
 
-                    is GemtextItem.Quote -> tag("quote") {
-                        text { item.text }
+                    is GemtextItem.Quote -> tag("blockquote") {
+                        text { item.text.htmlEncode() }
                     }
 
                     is GemtextItem.ParseError -> tag("div") {
@@ -50,12 +51,12 @@ class GemHypertextImpl(
                         tag("p") {
                             text { "Error:" }
                             tag("br")
-                            text { item.message }
+                            text { item.message.htmlEncode() }
                         }
                         tag("p") {
                             text { "Source line:" }
                             tag("br")
-                            text { item.sourceLine }
+                            text { item.sourceLine.htmlEncode() }
                         }
                     }
                 }
