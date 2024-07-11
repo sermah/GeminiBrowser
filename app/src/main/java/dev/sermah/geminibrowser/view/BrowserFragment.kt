@@ -37,7 +37,7 @@ class BrowserFragment : Fragment() {
         }
 
         viewModel.htmlFlow.onEach { html ->
-            binding.webView.loadData(html, "text/html; charset=utf-8", "UTF-8")
+            binding.webView.loadData(html, "text/html; charset=utf-8", "utf-8")
         }.launchIn(viewModel.viewModelScope)
     }
 

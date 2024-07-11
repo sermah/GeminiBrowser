@@ -104,6 +104,15 @@ fun XMLBuilder.tag(tag: String, block: XMLBuilder.() -> Unit = {}) {
     this.appendChild(buildXml(tag, block))
 }
 
+fun XMLBuilder.tag(tag: String, vararg attrs: Pair<String, String>, block: XMLBuilder.() -> Unit = {}) {
+    this.appendChild(
+        buildXml(tag) {
+            attributes(*attrs)
+            block()
+        }
+    )
+}
+
 fun XMLBuilder.text(block: () -> String) {
     this.appendChild(block())
 }
