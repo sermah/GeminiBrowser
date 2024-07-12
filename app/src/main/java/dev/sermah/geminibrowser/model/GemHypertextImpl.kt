@@ -1,5 +1,6 @@
 package dev.sermah.geminibrowser.model
 
+import android.net.Uri
 import androidx.core.text.htmlEncode
 import dev.sermah.geminibrowser.model.GemtextParser.GemtextItem
 import dev.sermah.geminibrowser.xml.XMLElement
@@ -37,6 +38,7 @@ class GemHypertextImpl(
                                 "a",
                                 "onclick" to "onClickLink(event)",
                                 "href" to link,
+                                "data-scheme" to link.uriScheme(),
                             ) {
                                 text {
                                     if (item.text.isNotBlank())
@@ -113,6 +115,10 @@ class GemHypertextImpl(
         }
     }
 
+    private fun String.uriScheme() = runCatching {
+        Uri.parse(this).scheme ?: "gemini" // null -> relative
+    }.getOrDefault("")
+
     private companion object {
         val APP_INTERFACE_SCRIPT =
             """
@@ -133,8 +139,14 @@ class GemHypertextImpl(
                     transform: translateY(2pt);
                     display: inline-block;
                 }
+                a:not([data-scheme="gemini"]):before {
+                    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyNCcgaGVpZ2h0PScxNicgdmlld0JveD0nMCAwIDI0IDE2Jz48cGF0aCBkPSdNNCA2aDEyTTQgMTBoMTJtLTQtOCA2IDYtNiA2JyBzdHJva2U9JyMzOTkyYjEnIGZpbGw9J25vbmUnLz48L3N2Zz4=");
+                }
                 a {
                     color: #52796f;
+                }
+                a:not([data-scheme="gemini"]) {
+                    color: #3992b1;
                 }
                 pre {
                     background-color: #eeeeee;
