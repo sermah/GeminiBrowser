@@ -129,9 +129,7 @@ class GemHypertextImpl(
                 }
                 a:before {
                     content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyNCcgaGVpZ2h0PScxNicgdmlld0JveD0nMCAwIDI0IDE2Jz48cGF0aCBkPSdNNCA2aDEyTTQgMTBoMTJtLTQtOCA2IDYtNiA2JyBzdHJva2U9JyM1Mjc5NmYnIGZpbGw9J25vbmUnLz48L3N2Zz4=");
-                    width: 12pt;
-                    height: 8pt;
-                    padding-right: 8pt;
+                    padding-right: 4pt;
                     transform: translateY(2pt);
                     display: inline-block;
                 }

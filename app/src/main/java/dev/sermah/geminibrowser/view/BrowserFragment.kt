@@ -39,6 +39,8 @@ class BrowserFragment : Fragment() {
         viewModel.htmlFlow.onEach { html ->
             binding.webView.loadData(html, "text/html; charset=utf-8", "utf-8")
         }.launchIn(viewModel.viewModelScope)
+
+        viewModel.openUrl("gemini://gemini.circumlunar.space/")
     }
 
     override fun onDestroyView() {
