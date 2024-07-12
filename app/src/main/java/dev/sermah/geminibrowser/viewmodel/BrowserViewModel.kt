@@ -15,26 +15,44 @@ import kotlinx.coroutines.launch
 class BrowserViewModel : ViewModel() {
     private val gemHypertext = InstanceProvider[GemHypertext::class.java]
     private val geminiClient = InstanceProvider[GeminiClient::class.java]
-    private val _htmlFlow = MutableStateFlow("")
+    private val _pageFlow = MutableStateFlow(Page("browser:start", "", 20))
 
-    val htmlFlow get() = _htmlFlow
+    val pageFlow get() = _pageFlow
 
-    fun openUrl(url: String) {
+    fun openUrl(url: String, redirected: Boolean = false) {
         Log.d(TAG, "openUrl($url)")
 
+        // TODO move to model
         CoroutineScope(AppDispatchers.Main).launch {
-            val resp = geminiClient.get(url)
+            val resp = geminiClient.get(url, pageFlow.value.url)
 
             when (resp) {
                 is GeminiResponse.Success ->
-                    _htmlFlow.update {
-                        gemHypertext.convertToHypertext(resp.body)
+                    _pageFlow.update {
+                        Page(
+                            url = url,
+                            html = gemHypertext.convertToHypertext(resp.body),
+                            code = resp.code,
+                            message = resp.mimeType,
+                            body = resp.body,
+                        )
                     }
 
+                is GeminiResponse.Redirect ->
+                    if (!redirected)
+                        openUrl(resp.uriReference, redirected = true)
                 else -> {}
             }
         }
     }
+
+    class Page(
+        val url: String,
+        val html: String,
+        val code: Int,
+        val message: String? = null,
+        val body: String? = null,
+    )
 
     companion object {
         const val TAG = "BrowserViewModel"

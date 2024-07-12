@@ -36,8 +36,8 @@ class BrowserFragment : Fragment() {
             addJavascriptInterface(this@BrowserFragment, "appInterface")
         }
 
-        viewModel.htmlFlow.onEach { html ->
-            binding.webView.loadData(html, "text/html; charset=utf-8", "utf-8")
+        viewModel.pageFlow.onEach { page ->
+            binding.webView.loadData(page.html, "text/html; charset=utf-8", "utf-8")
         }.launchIn(viewModel.viewModelScope)
 
         viewModel.openUrl("gemini://gemini.circumlunar.space/")

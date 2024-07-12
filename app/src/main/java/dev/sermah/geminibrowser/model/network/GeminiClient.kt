@@ -1,7 +1,7 @@
 package dev.sermah.geminibrowser.model.network
 
 interface GeminiClient {
-    suspend fun get(url: String): GeminiResponse
+    suspend fun get(url: String, originUrl: String? = null): GeminiResponse
 
     sealed class GeminiResponse(val code: Int) {
         // TODO Add support for inputs

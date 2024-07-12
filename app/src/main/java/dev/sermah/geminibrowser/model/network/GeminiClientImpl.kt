@@ -43,18 +43,31 @@ class GeminiClientImpl : GeminiClient {
         context.socketFactory
     }
 
-    override suspend fun get(url: String): GeminiResponse = withContext(AppDispatchers.IO) {
+    override suspend fun get(url: String, originUrl: String?): GeminiResponse = withContext(AppDispatchers.IO) {
         val parsedUrl = Uri.parse(url)
+        val parsedOriginUrl = Uri.parse(originUrl)
 
-        checkUri(parsedUrl)
+        val actualUrl =
+            if (parsedUrl.isRelative)
+                parsedOriginUrl.buildUpon().apply {
+                    parsedUrl.pathSegments?.forEach { segm ->
+                        appendPath(segm)
+                    }
+                }.build()
+            else
+                parsedUrl
 
-        val port = parsedUrl.port.let { if (it == -1) 1965 else it }
-        val request = "$parsedUrl\r\n"
+        Log.d("GeminiClient", "url='$url', originUrl='$originUrl', actualUrl='$actualUrl'")
+
+        checkUri(actualUrl)
+
+        val port = actualUrl.port.let { if (it == -1) 1965 else it }
+        val request = "$actualUrl\r\n"
 
         var header: String
         val bodyBuilder = StringBuilder()
 
-        socketFactory.createSocket(parsedUrl.host, port).use { sock ->
+        socketFactory.createSocket(actualUrl.host, port).use { sock ->
             sock.soTimeout = 10_000
             Log.d("GeminiClient", "Connected to (${sock.inetAddress}, ${sock.port}) = ${sock.isConnected}")
 
