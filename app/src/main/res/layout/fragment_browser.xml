@@ -42,12 +42,13 @@
                     style="@style/TextAppearance.AppCompat.Medium"
                     tools:text="gemini://geminiprotocol.net" />
 
-                <androidx.appcompat.widget.AppCompatImageButton
+                <ImageButton
                     android:id="@+id/btn_addr_refresh"
-                    style="@style/Widget.Material3.Button.IconButton"
+                    style="@style/Theme.GeminiBrowser.BottomBarButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:clickable="true"
                     android:src="@drawable/ic_refresh" />
             </LinearLayout>
 
@@ -57,41 +58,41 @@
                 android:orientation="horizontal"
                 android:gravity="center">
 
-                <androidx.appcompat.widget.AppCompatImageButton
+                <ImageButton
                     android:id="@+id/btn_nav_back"
-                    style="@style/Widget.Material3.Button.IconButton"
+                    style="@style/Theme.GeminiBrowser.BottomBarButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:src="@drawable/ic_arrow_back" />
 
-                <androidx.appcompat.widget.AppCompatImageButton
+                <ImageButton
                     android:id="@+id/btn_nav_forward"
-                    style="@style/Widget.Material3.Button.IconButton"
+                    style="@style/Theme.GeminiBrowser.BottomBarButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:src="@drawable/ic_arrow_forward" />
 
-                <androidx.appcompat.widget.AppCompatImageButton
+                <ImageButton
                     android:id="@+id/btn_nav_share"
-                    style="@style/Widget.Material3.Button.IconButton"
+                    style="@style/Theme.GeminiBrowser.BottomBarButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:src="@drawable/ic_share" />
 
-                <androidx.appcompat.widget.AppCompatImageButton
+                <ImageButton
                     android:id="@+id/btn_nav_bookmarks"
-                    style="@style/Widget.Material3.Button.IconButton"
+                    style="@style/Theme.GeminiBrowser.BottomBarButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:src="@drawable/ic_bookmark" />
 
-                <androidx.appcompat.widget.AppCompatImageButton
+                <ImageButton
                     android:id="@+id/btn_nav_tabs"
-                    style="@style/Widget.Material3.Button.IconButton"
+                    style="@style/Theme.GeminiBrowser.BottomBarButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
