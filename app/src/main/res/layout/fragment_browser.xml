@@ -1,13 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <WebView
-        android:id="@+id/web_view"
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <WebView
+            android:id="@+id/web_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:paddingVertical="4dp"
+            android:paddingHorizontal="2dp"
+            style="@style/Widget.AppCompat.ButtonBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/tv_addr_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textAlignment="center"
+                    android:layout_weight="4"
+                    android:paddingHorizontal="10dp"
+                    style="@style/TextAppearance.AppCompat.Medium"
+                    tools:text="gemini://geminiprotocol.net" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_addr_refresh"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_refresh" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_nav_back"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_arrow_back" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_nav_forward"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_arrow_forward" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_nav_share"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_share" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_nav_bookmarks"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_bookmark" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_nav_tabs"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_tabs" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 </LinearLayout>

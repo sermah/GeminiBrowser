@@ -36,10 +36,11 @@ class BrowserFragment : Fragment() {
             addJavascriptInterface(this@BrowserFragment, "appInterface")
         }
 
-        viewModel.pageFlow.onEach { page ->
-            // Did you yourHtml.replace("#", "%23") before panicking?
-            binding.webView.loadData(page.html, "text/html; charset=utf-8", "utf-8")
-        }.launchIn(viewModel.viewModelScope)
+        binding.apply {
+            btnAddrRefresh.setOnClickListener { onRefreshButtonClicked() }
+        }
+
+        viewModel.pageFlow.onEach(::onPage).launchIn(viewModel.viewModelScope)
 
         viewModel.openUrl("gemini://geminiprotocol.net/")
     }
@@ -49,6 +50,17 @@ class BrowserFragment : Fragment() {
         _binding = null
 
         super.onDestroyView()
+    }
+
+    private fun onPage(page: BrowserViewModel.Page) {
+        binding.tvAddrText.text = page.url
+
+        // Did you yourHtml.replace("#", "%23") before panicking?
+        binding.webView.loadData(page.html, "text/html; charset=utf-8", "utf-8")
+    }
+
+    private fun onRefreshButtonClicked() {
+        viewModel.refresh()
     }
 
     @JavascriptInterface

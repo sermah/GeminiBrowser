@@ -2,6 +2,7 @@ package dev.sermah.geminibrowser.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dev.sermah.geminibrowser.AppDispatchers
 import dev.sermah.geminibrowser.InstanceProvider
 import dev.sermah.geminibrowser.model.GemHypertext
@@ -9,7 +10,7 @@ import dev.sermah.geminibrowser.model.InternalPagesProvider
 import dev.sermah.geminibrowser.model.network.GeminiClient
 import dev.sermah.geminibrowser.model.network.GeminiClient.GeminiResponse
 import dev.sermah.geminibrowser.util.relativizeUri
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -20,6 +21,8 @@ class BrowserViewModel : ViewModel() {
     private val internalPagesProvider = InstanceProvider[InternalPagesProvider::class.java]
     private val _pageFlow = MutableStateFlow(Page("browser:start", "", 20))
 
+    private var pageLoadJob: Job? = null
+
     val pageFlow get() = _pageFlow
 
     fun openUrl(url: String, redirected: Boolean = false) {
@@ -28,7 +31,8 @@ class BrowserViewModel : ViewModel() {
         Log.d(TAG, "openUrl($url) -> $absoluteUrl")
 
         // TODO move to model
-        CoroutineScope(AppDispatchers.IO).launch {
+        pageLoadJob?.cancel()
+        pageLoadJob = viewModelScope.launch(AppDispatchers.IO) {
             runCatching {
                 geminiClient.get(absoluteUrl)
             }.onSuccess { response ->
@@ -81,6 +85,10 @@ class BrowserViewModel : ViewModel() {
                 Log.d(TAG, pageFlow.value.html)
             }
         }
+    }
+
+    fun refresh() {
+        openUrl(pageFlow.value.url)
     }
 
     class Page(
