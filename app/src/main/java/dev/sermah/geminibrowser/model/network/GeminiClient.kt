@@ -1,7 +1,7 @@
 package dev.sermah.geminibrowser.model.network
 
 interface GeminiClient {
-    suspend fun get(url: String, originUrl: String? = null): GeminiResponse
+    suspend fun get(url: String): GeminiResponse
 
     sealed class GeminiResponse(val code: Int) {
         // TODO Add support for inputs
@@ -62,11 +62,11 @@ interface GeminiClient {
 
             CERT(60), // requires cert
             CERT_NOT_AUTH(61), // certificate not authorized
-            CERT_NOT_VALID(62) // certificate not valid
+            CERT_NOT_VALID(62), // certificate not valid
         }
     }
 
-    // TODO Use connection exceptions in GeminiClientImpl
+    // TODO Look for more exceptions in GeminiClientImpl
     class WrongProtocolException(msg: String) : Exception(msg)
     class MalformedUriException(msg: String) : Exception(msg)
     class WrongHeaderException(msg: String) : Exception(msg)

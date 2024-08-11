@@ -46,32 +46,19 @@ class GeminiClientImpl : GeminiClient {
         context.socketFactory
     }
 
-    override suspend fun get(url: String, originUrl: String?): GeminiResponse = runCatching {
+    override suspend fun get(url: String): GeminiResponse = runCatching {
         withContext(AppDispatchers.IO) {
             val parsedUrl = Uri.parse(url)
-            val parsedOriginUrl = Uri.parse(originUrl)
 
-            val actualUrl =
-                if (parsedUrl.isRelative)
-                    parsedOriginUrl.buildUpon().apply {
-                        parsedUrl.pathSegments?.forEach { segm ->
-                            appendPath(segm)
-                        }
-                    }.build()
-                else
-                    parsedUrl
+            checkUri(parsedUrl)
 
-            Log.d(TAG, "url='$url', originUrl='$originUrl', actualUrl='$actualUrl'")
-
-            checkUri(actualUrl)
-
-            val port = actualUrl.port.let { if (it == -1) 1965 else it }
-            val request = "$actualUrl\r\n"
+            val port = parsedUrl.port.let { if (it == -1) 1965 else it }
+            val request = "$parsedUrl\r\n"
 
             var header: String
             val bodyBuilder = StringBuilder()
 
-            socketFactory.createSocket(actualUrl.host, port).use { sock ->
+            socketFactory.createSocket(parsedUrl.host, port).use { sock ->
                 sock.soTimeout = 10_000
                 Log.d(TAG, "Connected to (${sock.inetAddress}, ${sock.port}) = ${sock.isConnected}")
 
@@ -103,7 +90,7 @@ class GeminiClientImpl : GeminiClient {
             val headerMsg = if (header.length > 3) header.substring(3) else ""
             val body = bodyBuilder.toString()
 
-            Log.d(TAG, "code $code, headerMsg $headerMsg, body $body")
+            Log.d(TAG, "code $code, headerMsg $headerMsg, body.len ${body.length}")
 
             return@withContext when (code) {
                 in 10..19 -> GeminiResponse.Input(code, headerMsg)

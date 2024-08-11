@@ -37,6 +37,7 @@ class BrowserFragment : Fragment() {
         }
 
         viewModel.pageFlow.onEach { page ->
+            // Did you yourHtml.replace("#", "%23") before panicking?
             binding.webView.loadData(page.html, "text/html; charset=utf-8", "utf-8")
         }.launchIn(viewModel.viewModelScope)
 
