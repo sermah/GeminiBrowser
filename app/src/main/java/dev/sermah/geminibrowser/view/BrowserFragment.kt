@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import dev.sermah.geminibrowser.databinding.FragmentBrowserBinding
+import dev.sermah.geminibrowser.model.TabBrowser
 import dev.sermah.geminibrowser.viewmodel.BrowserViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -52,7 +53,7 @@ class BrowserFragment : Fragment() {
         super.onDestroyView()
     }
 
-    private fun onPage(page: BrowserViewModel.Page) {
+    private fun onPage(page: TabBrowser.Page) {
         binding.tvAddrText.text = page.url
 
         // Did you yourHtml.replace("#", "%23") before panicking?
