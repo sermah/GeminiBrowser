@@ -26,6 +26,18 @@ class BrowserViewModel : ViewModel() {
         tabBrowser.refresh()
     }
 
+    fun back() {
+        tabBrowser.back()
+    }
+
+    fun forward() {
+        tabBrowser.forward()
+    }
+
+    fun stop() {
+        tabBrowser.stop()
+    }
+
     companion object {
         private const val TAG = "BrowserViewModel"
     }

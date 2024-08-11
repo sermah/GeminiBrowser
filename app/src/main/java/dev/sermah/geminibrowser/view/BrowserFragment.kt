@@ -39,6 +39,8 @@ class BrowserFragment : Fragment() {
 
         binding.apply {
             btnAddrRefresh.setOnClickListener { onRefreshButtonClicked() }
+            btnNavBack.setOnClickListener { onBackClicked() }
+            btnNavForward.setOnClickListener { onForwardClicked() }
         }
 
         viewModel.pageFlow.onEach(::onPage).launchIn(viewModel.viewModelScope)
@@ -62,6 +64,18 @@ class BrowserFragment : Fragment() {
 
     private fun onRefreshButtonClicked() {
         viewModel.refresh()
+    }
+
+    private fun onBackClicked() {
+        viewModel.back()
+    }
+
+    private fun onForwardClicked() {
+        viewModel.forward()
+    }
+
+    private fun onStopClicked() {
+        viewModel.stop()
     }
 
     @JavascriptInterface

@@ -7,6 +7,8 @@ interface TabBrowser {
     val historyFlow: StateFlow<List<HistoryEntry>>
     val bookmarksFlow: StateFlow<List<Bookmark>>
 
+    val historyIdx: Int
+
     fun openUrl(url: String)
     fun refresh()
     fun back()
@@ -14,7 +16,7 @@ interface TabBrowser {
     fun stop()
     fun bookmarkUrl(url: String, title: String?)
     fun unbookmarkUrl(id: Int)
-    fun openFromHistory(id: Int)
+    fun historyOpen(id: Int)
 
     class Page(
         val url: String,
@@ -25,7 +27,6 @@ interface TabBrowser {
     )
 
     class HistoryEntry(
-        val id: Int,
         val url: String,
         val title: String? = null,
     )

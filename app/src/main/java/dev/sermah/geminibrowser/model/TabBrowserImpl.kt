@@ -1,6 +1,7 @@
 package dev.sermah.geminibrowser.model
 
 import android.util.Log
+import androidx.core.net.toUri
 import dev.sermah.geminibrowser.AppDispatchers
 import dev.sermah.geminibrowser.InstanceProvider
 import dev.sermah.geminibrowser.model.network.GeminiClient
@@ -19,24 +20,29 @@ class TabBrowserImpl(
     private val geminiClient = InstanceProvider[GeminiClient::class.java]
     private val internalPagesProvider = InstanceProvider[InternalPagesProvider::class.java]
 
+    private var pageLoadJob: Job? = null
+
     private val _pageFlow = MutableStateFlow(TabBrowser.Page("browser:start", "", 20))
     private val _historyFlow = MutableStateFlow(emptyList<TabBrowser.HistoryEntry>())
     private val _bookmarksFlow = MutableStateFlow(emptyList<TabBrowser.Bookmark>())
 
-    private var pageLoadJob: Job? = null
+    private var _historyIdx = -1
 
     override val pageFlow get() = _pageFlow
     override val historyFlow get() = _historyFlow
     override val bookmarksFlow get() = _bookmarksFlow
+    override val historyIdx get() = _historyIdx
 
-    override fun openUrl(url: String) = openUrlInternal(url)
+    override fun openUrl(url: String) {
+        historyClearAfter(historyIdx)
+        openUrlInternal(url = url, redirected = false, addToHistory = true)
+    }
 
-    private fun openUrlInternal(url: String, redirected: Boolean = false) {
+    private fun openUrlInternal(url: String, redirected: Boolean, addToHistory: Boolean) {
         val absoluteUrl = (pageFlow.value.url).relativizeUri(url)
 
         Log.d(TAG, "openUrl($url) -> $absoluteUrl")
 
-        // TODO move to model
         pageLoadJob?.cancel()
         pageLoadJob = coroutineScope.launch(AppDispatchers.IO) {
             runCatching {
@@ -53,13 +59,23 @@ class TabBrowserImpl(
                                 body = response.body,
                             )
                         }
-                        Log.d(TAG, "[Success, ${response.code}] ${response.mimeType}")
+                        if (addToHistory) addToHistory(
+                            TabBrowser.HistoryEntry(
+                                title = absoluteUrl.toUri().host, // TODO Replace with smart title extractor
+                                url = absoluteUrl,
+                            )
+                        )
+                        Log.i(TAG, "[Success, ${response.code}] ${response.mimeType}")
                     }
 
                     is GeminiResponse.Redirect -> {
                         if (!redirected)
-                            openUrl(response.uriReference)
-                        Log.d(TAG, "[Redirect, ${response.code}] ${response.uriReference}")
+                            openUrlInternal(
+                                url = response.uriReference,
+                                redirected = true,
+                                addToHistory = addToHistory,
+                            )
+                        Log.i(TAG, "[Redirect, ${response.code}] ${response.uriReference}")
                     }
 
                     else -> {
@@ -73,7 +89,13 @@ class TabBrowserImpl(
                                 code = response.code,
                             )
                         }
-                        Log.d(TAG, "[Gemini error, ${response.code}]")
+                        if (addToHistory) addToHistory(
+                            TabBrowser.HistoryEntry(
+                                title = "Error ${response.code}", // TODO Replace with smart title extractor (for errors)
+                                url = absoluteUrl,
+                            )
+                        )
+                        Log.w(TAG, "[Gemini error, ${response.code}]")
                     }
                 }
             }.onFailure { err ->
@@ -87,26 +109,66 @@ class TabBrowserImpl(
                         code = 0,
                     )
                 }
-                Log.d(TAG, "[Internal error, ${err.javaClass.simpleName}] ${err.message}")
+                if (addToHistory) addToHistory(
+                    TabBrowser.HistoryEntry(
+                        title = "Internal Error", // TODO Replace with smart title extractor (for errors)
+                        url = absoluteUrl,
+                    )
+                )
+                Log.w(TAG, "[Internal error, ${err.javaClass.simpleName}] ${err.message}")
                 Log.d(TAG, pageFlow.value.html)
             }
         }
     }
 
     override fun refresh() {
-        openUrl(pageFlow.value.url)
+        openUrlInternal(
+            url = pageFlow.value.url,
+            redirected = false,
+            addToHistory = false,
+        )
     }
 
     override fun back() {
-        TODO("Not yet implemented")
+        val history = historyFlow.value
+
+        if (historyIdx <= 0) {
+            Log.w(TAG, "[back] History index is 0 or less, can't go back")
+            return
+        }
+
+        val previousUrl = history[historyIdx - 1].url
+        // TODO Do fast cache-assisted loading
+        openUrlInternal(
+            url = previousUrl,
+            redirected = false,
+            addToHistory = false,
+        )
+
+        _historyIdx--
     }
 
     override fun forward() {
-        TODO("Not yet implemented")
+        val history = historyFlow.value
+
+        if (historyIdx == history.size - 1) {
+            Log.w(TAG, "[forward] History index is already at the last entry, can't go forward")
+            return
+        }
+
+        val nextUrl = history[historyIdx + 1].url
+        // TODO Do fast cache-assisted loading
+        openUrlInternal(
+            url = nextUrl,
+            redirected = false,
+            addToHistory = false,
+        )
+
+        _historyIdx++
     }
 
     override fun stop() {
-        TODO("Not yet implemented")
+        pageLoadJob?.cancel()
     }
 
     override fun bookmarkUrl(url: String, title: String?) {
@@ -117,8 +179,42 @@ class TabBrowserImpl(
         TODO("Not yet implemented")
     }
 
-    override fun openFromHistory(id: Int) {
-        TODO("Not yet implemented")
+    override fun historyOpen(idx: Int) {
+        val history = historyFlow.value
+
+        if (idx < 0 || idx >= history.size) {
+            Log.w(TAG, "[historyOpen] Requested history index is out of bounds ($idx/0..${history.size - 1}), can't proceed")
+            return
+        }
+
+        val urlAtIdx = history[idx].url
+        // TODO Do fast cache-assisted loading
+        openUrlInternal(
+            url = urlAtIdx,
+            redirected = false,
+            addToHistory = false,
+        )
+
+        _historyIdx = idx
+    }
+
+    private fun historyClearAfter(idx: Int) {
+        if (historyIdx >= idx) _historyIdx = idx
+
+        _historyFlow.update {
+            if (it.size > idx) {
+                it.subList(0, idx + 1)
+            } else {
+                it
+            }
+        }
+    }
+
+    private fun addToHistory(entry: TabBrowser.HistoryEntry) {
+        _historyFlow.update {
+            it + entry
+        }
+        _historyIdx++
     }
 
     companion object {
