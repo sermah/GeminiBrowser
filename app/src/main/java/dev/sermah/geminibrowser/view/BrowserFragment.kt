@@ -64,8 +64,15 @@ class BrowserFragment : Fragment() {
     }
 
     private fun onState(state: TabBrowser.State) {
-        binding.btnNavBack.isEnabled = state.canGoBack
-        binding.btnNavForward.isEnabled = state.canGoForward
+        binding.btnNavBack.apply {
+            isEnabled = state.canGoBack
+            alpha = if (isEnabled) 1f else 0.5f
+        }
+
+        binding.btnNavForward.apply {
+            isEnabled = state.canGoForward
+            alpha = if (isEnabled) 1f else 0.5f
+        }
 
         binding.btnAddrRefresh.setImageDrawable(
             AppCompatResources.getDrawable(
