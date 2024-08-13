@@ -5,18 +5,18 @@ import kotlinx.coroutines.flow.StateFlow
 interface TabBrowser {
     val pageFlow: StateFlow<Page>
     val historyFlow: StateFlow<List<HistoryEntry>>
-    val bookmarksFlow: StateFlow<List<Bookmark>>
 
     val historyIdx: Int
+    val isClosed: Boolean
 
     fun openUrl(url: String)
     fun refresh()
     fun back()
     fun forward()
     fun stop()
-    fun bookmarkUrl(url: String, title: String?)
-    fun unbookmarkUrl(id: Int)
     fun historyOpen(id: Int)
+
+    fun close()
 
     class Page(
         val url: String,
@@ -27,12 +27,6 @@ interface TabBrowser {
     )
 
     class HistoryEntry(
-        val url: String,
-        val title: String? = null,
-    )
-
-    class Bookmark(
-        val id: Int,
         val url: String,
         val title: String? = null,
     )

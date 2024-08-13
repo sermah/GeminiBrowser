@@ -24,14 +24,14 @@ class TabBrowserImpl(
 
     private val _pageFlow = MutableStateFlow(TabBrowser.Page("browser:start", "", 20))
     private val _historyFlow = MutableStateFlow(emptyList<TabBrowser.HistoryEntry>())
-    private val _bookmarksFlow = MutableStateFlow(emptyList<TabBrowser.Bookmark>())
 
     private var _historyIdx = -1
+    private var _isClosed = false
 
     override val pageFlow get() = _pageFlow
     override val historyFlow get() = _historyFlow
-    override val bookmarksFlow get() = _bookmarksFlow
     override val historyIdx get() = _historyIdx
+    override val isClosed get() = _isClosed
 
     override fun openUrl(url: String) {
         historyClearAfter(historyIdx)
@@ -171,14 +171,6 @@ class TabBrowserImpl(
         pageLoadJob?.cancel()
     }
 
-    override fun bookmarkUrl(url: String, title: String?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun unbookmarkUrl(id: Int) {
-        TODO("Not yet implemented")
-    }
-
     override fun historyOpen(idx: Int) {
         val history = historyFlow.value
 
@@ -196,6 +188,12 @@ class TabBrowserImpl(
         )
 
         _historyIdx = idx
+    }
+
+    override fun close() {
+        pageLoadJob?.cancel()
+
+        _isClosed = true
     }
 
     private fun historyClearAfter(idx: Int) {

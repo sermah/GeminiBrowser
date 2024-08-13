@@ -44,8 +44,6 @@ class BrowserFragment : Fragment() {
         }
 
         viewModel.pageFlow.onEach(::onPage).launchIn(viewModel.viewModelScope)
-
-        viewModel.openUrl("gemini://geminiprotocol.net/")
     }
 
     override fun onDestroyView() {
