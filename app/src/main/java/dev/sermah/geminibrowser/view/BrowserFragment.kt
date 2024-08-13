@@ -6,9 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dev.sermah.geminibrowser.R
 import dev.sermah.geminibrowser.databinding.FragmentBrowserBinding
 import dev.sermah.geminibrowser.model.TabBrowser
 import dev.sermah.geminibrowser.viewmodel.BrowserViewModel
@@ -38,12 +40,13 @@ class BrowserFragment : Fragment() {
         }
 
         binding.apply {
-            btnAddrRefresh.setOnClickListener { onRefreshButtonClicked() }
+            btnAddrRefresh.setOnClickListener { onRefreshClicked() }
             btnNavBack.setOnClickListener { onBackClicked() }
             btnNavForward.setOnClickListener { onForwardClicked() }
         }
 
         viewModel.pageFlow.onEach(::onPage).launchIn(viewModel.viewModelScope)
+        viewModel.tabStateFlow.onEach(::onState).launchIn(viewModel.viewModelScope)
     }
 
     override fun onDestroyView() {
@@ -60,8 +63,28 @@ class BrowserFragment : Fragment() {
         binding.webView.loadData(page.html, "text/html; charset=utf-8", "utf-8")
     }
 
-    private fun onRefreshButtonClicked() {
-        viewModel.refresh()
+    private fun onState(state: TabBrowser.State) {
+        binding.btnNavBack.isEnabled = state.canGoBack
+        binding.btnNavForward.isEnabled = state.canGoForward
+
+        binding.btnAddrRefresh.setImageDrawable(
+            AppCompatResources.getDrawable(
+                requireContext(),
+                if (state.isLoading) {
+                    R.drawable.ic_cross
+                } else {
+                    R.drawable.ic_refresh
+                }
+            )
+        )
+    }
+
+    private fun onRefreshClicked() {
+        if (viewModel.tabStateFlow.value.isLoading) {
+            viewModel.stop()
+        } else {
+            viewModel.refresh()
+        }
     }
 
     private fun onBackClicked() {
@@ -70,10 +93,6 @@ class BrowserFragment : Fragment() {
 
     private fun onForwardClicked() {
         viewModel.forward()
-    }
-
-    private fun onStopClicked() {
-        viewModel.stop()
     }
 
     @JavascriptInterface

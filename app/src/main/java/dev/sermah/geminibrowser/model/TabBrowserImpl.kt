@@ -10,6 +10,7 @@ import dev.sermah.geminibrowser.util.relativizeUri
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -24,14 +25,16 @@ class TabBrowserImpl(
 
     private val _pageFlow = MutableStateFlow(TabBrowser.Page("browser:start", "", 20))
     private val _historyFlow = MutableStateFlow(emptyList<TabBrowser.HistoryEntry>())
+    private val _stateFlow = MutableStateFlow(TabBrowser.State(isLoading = false, canGoBack = false, canGoForward = false))
 
     private var _historyIdx = -1
     private var _isClosed = false
 
-    override val pageFlow get() = _pageFlow
-    override val historyFlow get() = _historyFlow
+    override val pageFlow get() = _pageFlow.asStateFlow()
+    override val historyFlow get() = _historyFlow.asStateFlow()
     override val historyIdx get() = _historyIdx
     override val isClosed get() = _isClosed
+    override val stateFlow get() = _stateFlow.asStateFlow()
 
     override fun openUrl(url: String) {
         historyClearAfter(historyIdx)
@@ -44,10 +47,13 @@ class TabBrowserImpl(
         Log.d(TAG, "openUrl($url) -> $absoluteUrl")
 
         pageLoadJob?.cancel()
+        updateState(isLoading = true)
         pageLoadJob = coroutineScope.launch(AppDispatchers.IO) {
             runCatching {
                 geminiClient.get(absoluteUrl)
             }.onSuccess { response ->
+                updateState(isLoading = false)
+
                 when (response) {
                     is GeminiResponse.Success -> {
                         _pageFlow.update {
@@ -99,6 +105,8 @@ class TabBrowserImpl(
                     }
                 }
             }.onFailure { err ->
+                updateState(isLoading = false)
+
                 _pageFlow.update {
                     TabBrowser.Page(
                         url = absoluteUrl,
@@ -146,6 +154,7 @@ class TabBrowserImpl(
         )
 
         _historyIdx--
+        updateState(updateHistory = true)
     }
 
     override fun forward() {
@@ -165,6 +174,7 @@ class TabBrowserImpl(
         )
 
         _historyIdx++
+        updateState(updateHistory = true)
     }
 
     override fun stop() {
@@ -206,6 +216,7 @@ class TabBrowserImpl(
                 it
             }
         }
+        updateState(updateHistory = true)
     }
 
     private fun addToHistory(entry: TabBrowser.HistoryEntry) {
@@ -213,6 +224,17 @@ class TabBrowserImpl(
             it + entry
         }
         _historyIdx++
+        updateState(updateHistory = true)
+    }
+
+    private fun updateState(isLoading: Boolean? = null, updateHistory: Boolean = false) {
+        _stateFlow.update {
+            TabBrowser.State(
+                isLoading = isLoading ?: it.isLoading,
+                canGoBack = if (updateHistory) historyIdx > 0 else it.canGoBack,
+                canGoForward = if (updateHistory) historyIdx < historyFlow.value.size - 1 else it.canGoForward,
+            )
+        }
     }
 
     companion object {

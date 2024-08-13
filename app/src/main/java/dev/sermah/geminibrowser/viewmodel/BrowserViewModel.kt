@@ -24,6 +24,9 @@ class BrowserViewModel : ViewModel() {
     private var _pageFlow = tabBrowser.pageFlow
     val pageFlow: StateFlow<TabBrowser.Page> = _pageFlow
 
+    private var _tabStateFlow = tabBrowser.stateFlow
+    val tabStateFlow: StateFlow<TabBrowser.State> = _tabStateFlow
+
     init {
         browser.tabsFlow.onEach { tabs ->
             if (tabBrowser.isClosed) {
@@ -31,6 +34,8 @@ class BrowserViewModel : ViewModel() {
             }
             _pageFlow = tabBrowser.pageFlow
         }.launchIn(viewModelScope)
+
+
     }
 
     fun openUrl(url: String) {
