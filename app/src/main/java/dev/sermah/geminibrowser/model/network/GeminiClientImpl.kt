@@ -6,6 +6,7 @@ import dev.sermah.geminibrowser.AppDispatchers
 import dev.sermah.geminibrowser.model.network.GeminiClient.GeminiResponse
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.net.NoRouteToHostException
 import java.net.UnknownHostException
 import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
@@ -80,12 +81,12 @@ class GeminiClientImpl : GeminiClient {
             }
 
             if (header.length < 2)
-                throw GeminiClient.WrongHeaderException("Header length must be 2 or greater. Actual length is ${header.length}")
+                throw GeminiClient.IncorrectHeaderException("Header length must be 2 or greater. Actual length is ${header.length}")
 
             val code: Int = (header[0] - '0') * 10 + (header[1] - '0')
 
             if (code !in 10..69)
-                throw GeminiClient.WrongHeaderException("Status code ($code) should be in 10..69")
+                throw GeminiClient.IncorrectHeaderException("Status code ($code) should be in 10..69")
 
             val headerMsg = if (header.length > 3) header.substring(3) else ""
             val body = bodyBuilder.toString()
@@ -104,11 +105,13 @@ class GeminiClientImpl : GeminiClient {
         }
     }.onFailure { ex ->
         when (ex) {
-            is UnknownHostException ->
+            is UnknownHostException,
+            is NoRouteToHostException,
+            ->
                 throw GeminiClient.ConnectionFailedException(ex)
 
             is IOException ->
-                throw GeminiClient.ConnectionDisruptedException(ex)
+                throw GeminiClient.ConnectionException(ex)
         }
     }.getOrThrow()
 

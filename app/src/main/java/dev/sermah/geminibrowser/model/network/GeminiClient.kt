@@ -69,7 +69,8 @@ interface GeminiClient {
     // TODO Look for more exceptions in GeminiClientImpl
     class WrongProtocolException(msg: String) : Exception(msg)
     class MalformedUriException(msg: String) : Exception(msg)
-    class WrongHeaderException(msg: String) : Exception(msg)
-    class ConnectionDisruptedException(ex: Throwable) : Exception(ex)
-    class ConnectionFailedException(ex: Throwable) : Exception(ex)
+    class IncorrectHeaderException(msg: String) : Exception(msg)
+
+    open class ConnectionException(ex: Throwable) : Exception(ex)
+    class ConnectionFailedException(ex: Throwable) : ConnectionException(ex)
 }
