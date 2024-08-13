@@ -7,6 +7,7 @@ import dev.sermah.geminibrowser.InstanceProvider
 import dev.sermah.geminibrowser.model.network.GeminiClient
 import dev.sermah.geminibrowser.model.network.GeminiClient.GeminiResponse
 import dev.sermah.geminibrowser.util.relativizeUri
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -106,6 +107,11 @@ class TabBrowserImpl(
                 }
             }.onFailure { err ->
                 updateState(isLoading = false)
+
+                if (err is CancellationException) {
+                    Log.i(TAG, "[Stopped by stop(), ${err.javaClass.simpleName}] ${err.message}")
+                    return@onFailure
+                }
 
                 _pageFlow.update {
                     TabBrowser.Page(
