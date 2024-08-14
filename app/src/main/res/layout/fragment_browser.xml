@@ -29,6 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:background="@drawable/bg_address_uri"
                 android:gravity="center">
 
                 <EditText
@@ -39,11 +40,12 @@
                     android:singleLine="true"
                     android:inputType="textUri"
                     android:ellipsize="end"
-                    android:textAlignment="center"
-                    android:layout_weight="4"
+                    android:textAlignment="textStart"
+                    android:layout_weight="5"
                     android:paddingTop="20dp"
                     android:paddingBottom="20dp"
-                    android:background="@drawable/bg_address_uri"
+                    android:paddingLeft="16dp"
+                    android:background="@null"
                     tools:text="gemini://geminiprotocol.net" />
 
                 <ImageButton
