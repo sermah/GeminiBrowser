@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import androidx.activity.addCallback
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -23,6 +24,8 @@ class BrowserFragment : Fragment() {
     private val binding: FragmentBrowserBinding
         get() = checkNotNull(_binding)
 
+    private var canGoBack: Boolean = false
+
     private val viewModel: BrowserViewModel by lazy {
         ViewModelProvider(requireActivity())[BrowserViewModel::class.java]
     }
@@ -34,6 +37,16 @@ class BrowserFragment : Fragment() {
 
     @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val activity = requireActivity()
+
+        activity.onBackPressedDispatcher.addCallback {
+            if (canGoBack) {
+                onBackClicked()
+            } else {
+                activity.finish()
+            }
+        }
+
         binding.webView.apply {
             settings.javaScriptEnabled = true
             addJavascriptInterface(this@BrowserFragment, "appInterface")
@@ -68,6 +81,7 @@ class BrowserFragment : Fragment() {
             isEnabled = state.canGoBack
             alpha = if (isEnabled) 1f else 0.5f
         }
+        canGoBack = state.canGoBack
 
         binding.btnNavForward.apply {
             isEnabled = state.canGoForward
