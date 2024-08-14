@@ -2,12 +2,15 @@ package dev.sermah.geminibrowser.view
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.webkit.JavascriptInterface
 import androidx.activity.addCallback
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -17,6 +20,7 @@ import dev.sermah.geminibrowser.model.TabBrowser
 import dev.sermah.geminibrowser.viewmodel.BrowserViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+
 
 class BrowserFragment : Fragment() {
 
@@ -56,6 +60,24 @@ class BrowserFragment : Fragment() {
             btnAddrRefresh.setOnClickListener { onRefreshClicked() }
             btnNavBack.setOnClickListener { onBackClicked() }
             btnNavForward.setOnClickListener { onForwardClicked() }
+
+            etAddrText.setOnKeyListener { _, keyCode, event ->
+                if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                    etAddrText.apply {
+                        onAddressEntered(text.toString())
+                        clearFocus()
+                    }
+
+                    true
+                } else {
+                    false
+                }
+            }
+            etAddrText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    hideKeyboard()
+                }
+            }
         }
 
         viewModel.pageFlow.onEach(::onPage).launchIn(viewModel.viewModelScope)
@@ -70,7 +92,7 @@ class BrowserFragment : Fragment() {
     }
 
     private fun onPage(page: TabBrowser.Page) {
-        binding.tvAddrText.text = page.url
+        binding.etAddrText.setText(page.url)
 
         // Did you yourHtml.replace("#", "%23") before panicking?
         binding.webView.loadData(page.html, "text/html; charset=utf-8", "utf-8")
@@ -114,6 +136,15 @@ class BrowserFragment : Fragment() {
 
     private fun onForwardClicked() {
         viewModel.forward()
+    }
+
+    private fun onAddressEntered(addr: String) {
+        viewModel.openUrl(addr)
+    }
+
+    private fun hideKeyboard() {
+        val manager = getSystemService(requireContext(), InputMethodManager::class.java)
+        manager?.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
     @JavascriptInterface
